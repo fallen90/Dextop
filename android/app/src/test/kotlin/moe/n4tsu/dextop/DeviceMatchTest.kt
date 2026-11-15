@@ -6,6 +6,36 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DeviceMatchTest {
+    private val pad10 = DeviceIdentity(
+        "HONOR", "HONOR", "HEY3-W00", "HNHEY3-Q1", "HEY3-W09",
+        "HONOR/HEY3-W09/HNHEY3-Q1:16/build", 36,
+    )
+
+    @Test fun pad10UsesSeparateFullscreenAppDisplaysWithoutOemNavigationBars() {
+        val profile = DesktopEnvironmentRegistry.resolve(pad10)
+        assertEquals("honor_pad10", profile.id)
+        assertFalse(profile.allowSystemDecorations)
+        assertTrue(profile.defaultDirectTouch)
+        assertTrue(profile.directPlasmaDisplay)
+        assertTrue(profile.fullscreenApplicationDisplays)
+        assertTrue(profile.passivePlasmaShellFocus)
+        assertEquals("dextop_book", profile.defaultWindowManager)
+        assertEquals("0", profile.temporaryGlobalSettings["force_desktop_mode_on_external_displays"])
+        assertEquals("1", profile.temporaryGlobalSettings["force_resizable_activities"])
+    }
+
+    @Test fun pad10WorkaroundDoesNotAffectOtherHonorModelsOrAndroidVersions() {
+        for (other in listOf(pad10.copy(model = "BKQ-AN10"), pad10.copy(sdk = 35), pad10.copy(sdk = 37))) {
+            val profile = DesktopEnvironmentRegistry.resolve(other)
+            assertEquals("honor_magicos", profile.id)
+            assertTrue(profile.allowSystemDecorations)
+            assertFalse(profile.defaultDirectTouch)
+            assertFalse(profile.directPlasmaDisplay)
+            assertFalse(profile.fullscreenApplicationDisplays)
+        }
+        assertEquals("honor_pad10", DesktopEnvironmentRegistry.resolve(pad10.copy(model = "HEY3-W09")).id)
+    }
+
     private val xiaomiAurora = DeviceIdentity(
         "Xiaomi", "Xiaomi", "24030PN60G", "aurora", "aurora_global", "Xiaomi/aurora_global/aurora:16/build", 36,
     )

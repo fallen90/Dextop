@@ -6,6 +6,30 @@ package moe.n4tsu.dextop
  */
 internal object DeviceProfiles {
     val rules: List<DesktopEnvironmentRule> = listOf(
+        // Verified firmware: Pad 10 10.0.0.134(C636E4R104P1), Android 16.
+        // HONOR's virtual-display navigation bar crashes and its native
+        // freeform manager minimizes older windows. Book composites separate
+        // fullscreen application displays instead of using that manager.
+        DesktopEnvironmentRule(
+            "honor_pad10",
+            DeviceMatch(manufacturers = setOf("honor"),
+                models = setOf("HEY3-W00", "HEY3-W09"), minSdk = 36, maxSdk = 36)
+        ) { identity ->
+            val base = DesktopEnvironmentRegistry.vendorFreeform(
+                identity, "honor_pad10", "nativeHonorMagicosDesktop")
+            base.copy(
+                temporaryGlobalSettings = base.temporaryGlobalSettings + mapOf(
+                    "enable_freeform_support" to "1",
+                    "force_desktop_mode_on_external_displays" to "0",
+                ),
+                allowSystemDecorations = false,
+                defaultDirectTouch = true,
+                directPlasmaDisplay = true,
+                fullscreenApplicationDisplays = true,
+                passivePlasmaShellFocus = true,
+                defaultWindowManager = "dextop_book",
+            )
+        },
         DesktopEnvironmentRule(
             "samsung_trifold",
             DeviceMatch(manufacturers = setOf("samsung"), devices = setOf("q7mq"), minSdk = 36)

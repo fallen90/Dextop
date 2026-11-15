@@ -53,7 +53,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "moe.n4tsu.dextop"
+        applicationId = "moe.n4tsu.dextop.pad10"
         // Desktop windows and task descriptions require Android 13 or later.
         minSdk = 33
         targetSdk = flutter.targetSdkVersion

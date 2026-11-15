@@ -54,6 +54,10 @@ internal data class DesktopEnvironment(
     val startupMode: DesktopStartupMode,
     val displayChromeMode: DisplayChromeMode,
     val supportsLaunchBounds: Boolean = true,
+    /** Some OEM navigation bars crash when attached to a virtual display. */
+    val allowSystemDecorations: Boolean = true,
+    /** Tablets used as their own desktop should accept taps at their location. */
+    val defaultDirectTouch: Boolean = false,
     /** Recreate a device-resolution session when a foldable host changes size. */
     val autoResizeWithHostDisplay: Boolean = false,
     /**

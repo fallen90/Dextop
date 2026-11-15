@@ -241,7 +241,8 @@ class MirrorService : AccessibilityService(), SurfaceHolder.Callback {
             // rebuilding it for every new car Surface.
             val dextopAuto = autoOnly && context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
                 .getString("flutter.android_auto_shell", "dextop") == "dextop"
-            val effectiveDecorations = if (dextopAuto) false else running?.let {
+            val effectiveDecorations = if (dextopAuto ||
+                !DesktopEnvironmentRegistry.current().allowSystemDecorations) false else running?.let {
                 decorations || it.shouldUsePersistedSystemDecorations()
             } ?: decorations
             if (active && running != null && running.targetDisplayId >= 0 &&
@@ -2087,7 +2088,7 @@ class MirrorService : AccessibilityService(), SurfaceHolder.Callback {
             .remove("flutter.virtual_mouse_acceleration")
             .apply()
         directTouch = getSharedPreferences(PREFS, MODE_PRIVATE)
-            .getBoolean(KEY_DIRECT_TOUCH, false)
+            .getBoolean(KEY_DIRECT_TOUCH, DesktopEnvironmentRegistry.current().defaultDirectTouch)
         // The overlay routing controls were retired. Leave physical devices
         // under Android's normal display routing instead of changing them.
         routePhysicalMouseToDextop = false
@@ -3213,7 +3214,7 @@ class MirrorService : AccessibilityService(), SurfaceHolder.Callback {
         // Laptop mode is applied only after its two panes have completed layout.
         // Pre-halving a recovered configuration attaches half-height content to
         // a still-full-height Surface and produces a narrow centred strip.
-        return config
+        return config.copy(decorations = config.decorations && desktopEnvironment.allowSystemDecorations)
     }
 
     private fun addWindow() {
@@ -13835,6 +13836,7 @@ class MirrorService : AccessibilityService(), SurfaceHolder.Callback {
     ) {
         // Last line of defence: Android Auto sessions only ever clear these flags.
         if (disabled && autoOnlySession) return
+        if (target == "desktop" && !desktopEnvironment.allowSystemDecorations) return
         runCatching {
             val service = systemService("statusbar", STATUS_BAR_INTERFACE)
             val type = Class.forName(STATUS_BAR_INTERFACE)
